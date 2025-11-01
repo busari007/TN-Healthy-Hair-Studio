@@ -2,6 +2,7 @@ import section2Image from "/src/assets/images/section2_spa_image.png";
 
 export default function Section2(){
     return(
+      //About Us
         <div className="w-full">
             <div className="h-full flex flex-col md:flex-row items-center justify-center m-4 md:m-10 lg:mt-20 mb-15 lg:mb-20 gap-8 lg:gap-16">
   {/* Text Section */}

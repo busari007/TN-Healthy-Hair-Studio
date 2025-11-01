@@ -19,11 +19,11 @@ export default function BookingSection({ selectedService = "Hair Styling" }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-white px-4">
-      <h1 className="text-3xl text-center Playfair font-semibold mt-18">Book An Appointment</h1>
+    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-black px-4">
+      <h1 className="text-3xl lg:text-4xl text-center Playfair font-semibold mt-20 lg:mt-25 text-white">Book An Appointment</h1>
 
       {/* Display selected service */}
-      <p className="mt-3 text-gray-700 Lato text-lg lg:text-xl">
+      <p className="mt-3 text-gray-300 Lato text-base lg:text-lg">
         Selected Service: <span className="font-semibold">{selectedService}</span>
       </p>
 
@@ -37,9 +37,9 @@ export default function BookingSection({ selectedService = "Hair Styling" }) {
                 setCurrentStep(Number(step));
               }
             }}
-            className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-lg font-semibold transition-all duration-300 ${
+            className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-lg font-semibold transition-all duration-300 hover:cursor-pointer ${
               currentStep === Number(step)
-                ? "bg-black text-white border-black"
+                ? "bg-white text-black border-white"
                 : "border-gray-400 text-gray-600"
             }`}
           >
@@ -93,8 +93,8 @@ export default function BookingSection({ selectedService = "Hair Styling" }) {
             disabled={(currentStep === 1 && !selectedDate) || (currentStep === 2 && !selectedStaff)}
             className={`px-6 py-2 border rounded-md text-sm transition-all ${
               (currentStep === 1 && !selectedDate) || (currentStep === 2 && !selectedStaff)
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
+                ? "bg-white text-gray-800 cursor-not-allowed hover:cursor-pointer"
+                : "bg-[#F0CCCE] text-black hover:hover:bg-[#e2babc] hover:cursor-pointer"
             }`}
           >
             Next

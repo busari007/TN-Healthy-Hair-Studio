@@ -21,7 +21,7 @@ export default function TimeSelection({ selectedDate, selectedStaff, selectedSer
   const timeSlots = ["9:00 AM", "12:00 PM"];
 
   const handleTimeClick = (time) => {
-    console.log("Booking Selected:", {
+    console.log(`Booking Selected: `, {
       service: selectedService,
       ...selectedDate,
       staff: selectedStaff,
@@ -43,7 +43,7 @@ export default function TimeSelection({ selectedDate, selectedStaff, selectedSer
               key={time}
               onClick={() => !isBooked && handleTimeClick(time)}
               disabled={isBooked}
-              className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
+              className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:cursor-pointer ${
                 isBooked
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#F0CCCE] hover:bg-[#e2babc] text-gray-800"

@@ -27,6 +27,7 @@ export default function Section4() {
   ];
 
   return (
+    //Benefits Section
     <div className="w-full bg-[#F7F5F2] mt-10 lg:mt-30">
       <div className="flex flex-col items-center">
         {/* Section4 Header */}

@@ -33,7 +33,7 @@ export default function StaffAvailability({ selectedDate, onStaffSelect }) {
               key={staff}
               onClick={() => !isBooked && onStaffSelect(staff)}
               disabled={isBooked}
-              className={`p-6 rounded-xl text-lg font-semibold transition-all duration-300 ${
+              className={`p-6 rounded-xl text-lg font-semibold transition-all duration-300 hover:cursor-pointer ${
                 isBooked
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#F0CCCE] hover:bg-[#e2babc] text-gray-800"

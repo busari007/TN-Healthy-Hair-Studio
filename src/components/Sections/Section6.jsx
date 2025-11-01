@@ -6,8 +6,8 @@ export default function Section6(){
 
     const images = [image1, image2, image3];
     return(
+      //Gallery Section
         <div className="w-full">
-            {/* Gallery Section */}
 <div className="w-full bg-[#D8CEC4] flex flex-col items-center text-center py-16 px-4">
   {/* Header */}
   <h1 className="Playfair text-3xl md:text-4xl lg:text-5xl max-w-2xl leading-tight">

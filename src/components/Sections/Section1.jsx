@@ -17,6 +17,7 @@ export default function Section1() {
   }, []);
 
   return (
+    //Landing Page
     <div
       id="home"
       className="relative flex items-center justify-center w-full h-screen bg-cover bg-center bg-no-repeat transition-all duration-300"

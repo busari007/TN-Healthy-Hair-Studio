@@ -83,20 +83,20 @@ export default function Calendar({ onDateSelect }) {
   };
 
   return (
-    <div className="flex flex-col items-center py-10 w-full">
-      <h2 className="Playfair text-2xl md:text-3xl mb-4 text-gray-800">
+    <div className="flex flex-col items-center py-5 w-full">
+      <h2 className="Playfair text-lg lg:text-2xl mb-4 text-gray-300">
         Select a Date
       </h2>
 
       {/* Month Navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mb-6 border">
         <button
           onClick={() => changeMonth(-1)}
-          className="px-3 py-1 bg-[#F0CCCE] rounded-xl hover:bg-[#e3aeb1] transition-all"
+          className="px-2 bg-[#F0CCCE] rounded-lg hover:bg-[#e3aeb1] transition-all hover:cursor-pointer"
         >
           ←
         </button>
-        <span className="text-lg font-semibold">
+        <span className="text-sm lg:text-base font-semibold text-white">
           {currentMonth.toLocaleString("default", {
             month: "long",
             year: "numeric",
@@ -104,7 +104,7 @@ export default function Calendar({ onDateSelect }) {
         </span>
         <button
           onClick={() => changeMonth(1)}
-          className="px-3 py-1 bg-[#F0CCCE] rounded-xl hover:bg-[#e3aeb1] transition-all"
+          className="px-2 bg-[#F0CCCE] rounded-lg hover:bg-[#e3aeb1] transition-all hover:cursor-pointer"
         >
           →
         </button>
@@ -113,7 +113,7 @@ export default function Calendar({ onDateSelect }) {
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2 w-full max-w-lg text-center px-2">
         {daysOfWeek.map((day) => (
-          <div key={day} className="text-sm font-semibold text-gray-700">
+          <div key={day} className="text-sm font-semibold text-gray-200">
             {day}
           </div>
         ))}
@@ -132,7 +132,7 @@ export default function Calendar({ onDateSelect }) {
             selectedDate && toISODate(selectedDate) === toISODate(date);
 
           const baseClasses =
-            "flex items-center justify-center rounded-lg h-10 text-sm font-medium transition-all";
+            "flex items-center justify-center rounded-xl h-10 text-xs font-medium transition-all";
           let stateClasses = "";
 
           if (faded) {

@@ -65,6 +65,7 @@ This soothing treatment includes a hot oil session, micromist and 3-step shampoo
   ];
 
   return (
+    // Services Section
     <div className="w-full">
       <div
         id="services"
