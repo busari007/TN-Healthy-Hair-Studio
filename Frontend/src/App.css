@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@tailwind utilities;
+@import "tailwindcss";
+
+
+.Playfair{
+    font-family: 'Playfair Display', serif;
+}
+
+.Lato{
+    font-family: 'Lato', serif;
+}
+
+.Jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* 🌫️ Floating, minimal scrollbar overlay */
+html {
+  overflow-y: overlay; /* ✅ Makes scrollbar overlap content instead of pushing it */
+}
+
+/* For WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 1px;               /* Thin scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: none;  /* Fully invisible track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 180, 180);  /* Light gray, slightly transparent */
+  border-radius: 9999px;                 /* Fully rounded */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(180, 180, 180, 0.5);  /* Slightly darker on hover */
+}
+
