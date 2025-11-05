@@ -1,13 +1,29 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Calendar from "./Calendar";
 import StaffAvailability from "./StaffAvailability";
 import TimeSelection from "./TimeSelection";
+import { useLocation, useNavigate } from "react-router-dom";
 
-export default function BookingSection({ selectedService = "Hair Styling" }) {
+export default function BookingSection({}) {
+  const location = useLocation();
+  const selectedService = location.state?.service;
+  const service_name = selectedService.name;
+  const service_amount = selectedService.amount;
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
+
+  useEffect(() => {
+    if (!selectedService) {
+      navigate("/#services", { replace: true }); // Redirect back to services
+    }
+  }, [selectedService, navigate]);
+
+  if (!selectedService) {
+    return null; // Prevents rendering before redirect happens
+  }
 
   const handleNext = () => {
     if (currentStep === 1 && selectedDate) setCurrentStep(2);
@@ -23,8 +39,8 @@ export default function BookingSection({ selectedService = "Hair Styling" }) {
       <h1 className="text-3xl lg:text-4xl text-center Playfair font-semibold mt-20 lg:mt-25 text-white">Book An Appointment</h1>
 
       {/* Display selected service */}
-      <p className="mt-3 text-gray-300 Lato text-base lg:text-lg">
-        Selected Service: <span className="font-semibold">{selectedService}</span>
+      <p className="mt-3 text-gray-300 Lato text-base lg:text-lg text-center">
+        Selected Service: <span className="font-semibold">{service_name}</span>
       </p>
 
       {/* Step progress indicator */}
@@ -69,7 +85,8 @@ export default function BookingSection({ selectedService = "Hair Styling" }) {
       {currentStep === 3 && selectedStaff && (
         <div className="w-full flex justify-center mt-10">
           <TimeSelection
-            selectedService={selectedService}
+            service_name={service_name}
+            service_amount={service_amount}
             selectedDate={selectedDate}
             selectedStaff={selectedStaff}
             onTimeSelect={(time) => setSelectedTime(time)}

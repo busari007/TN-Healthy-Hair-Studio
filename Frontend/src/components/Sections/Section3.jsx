@@ -8,6 +8,7 @@ import dandruff from "/src/assets/images/Dandruff.png";
 import Section4 from "./Section4";
 import Section5 from "./Section5";
 import ModalWrapper from "../ModalWrapper";
+import { Link } from "react-router-dom";
 
 export default function Section3() {
   const [selectedService, setSelectedService] = useState(null);
@@ -18,6 +19,7 @@ export default function Section3() {
       name: "Moisture Fusion",
       image: moisture_fusion,
       price: "₦50,000",
+      amount: 50000,
       time: "60 Minutes - 90 Minutes",
       includes: [
         "Hot Oil Treatment",
@@ -40,6 +42,7 @@ export default function Section3() {
       name: "Strengthening/Bond Repair",
       image: bond_repair,
       price: "₦65,000",
+      amount:65000,
       time: "60 Minutes",
       includes: [
         "Hot Oil Treatment",
@@ -62,6 +65,7 @@ export default function Section3() {
       name: "New Client: Hair Repair/ Hair Restoration",
       image: hair_repair,
       price: "₦10,000+",
+      amount: 10000,
       time: "30 Minutes - 40 Minutes",
       includes: [
         "Hair & Scalp Consultation",
@@ -81,6 +85,7 @@ export default function Section3() {
       name: "Do It Yourself (DIY) Hair Care",
       image: DIY,
       price: "₦55,000",
+      amount: 55000,
       time: "30 Minutes - 40 Minutes",
       includes: [
         "Consultation & Analysis",
@@ -100,6 +105,7 @@ export default function Section3() {
       name: "Chemical Process (Relaxer)",
       image: relaxer,
       price: "₦50,000",
+      amount: 50000,
       time: "60 Minutes",
       includes: [
         "Scalp Shielding",
@@ -120,6 +126,7 @@ export default function Section3() {
       name: "Dandruff Treatment",
       image: dandruff,
       price: "₦60,000",
+      amount: 60000,
       time: "30 Minutes - 40 Minutes",
       includes: [
         "Trichoscope Analysis",
@@ -201,16 +208,17 @@ export default function Section3() {
       </div>
 
       {/* Booking Button */}
-      <a
-        href="/payment"
-        className="block mt-6 mb-2"
-      >
-        <div className="w-full max-w-xs mx-auto px-4 py-2 md:px-5 md:py-3 bg-[#F0CCCE] text-center rounded-2xl cursor-pointer hover:bg-[#e8b9bc] transition-colors duration-300 shadow-lg hover:shadow-xl">
-          <p className="Jakarta text-sm md:text-base font-semibold text-gray-800 tracking-wide">
-            BOOK NOW
-          </p>
-        </div>
-      </a>
+      <Link
+  to="/book_service"
+  state={{ service: selectedService  }} // Pass the whole service object or just service.name
+  className="block mt-6 mb-2"
+>
+  <div className="w-full max-w-xs mx-auto px-4 py-2 md:px-5 md:py-3 bg-[#F0CCCE] text-center rounded-2xl cursor-pointer hover:bg-[#e8b9bc] transition-colors duration-300 shadow-lg hover:shadow-xl">
+    <p className="Jakarta text-sm md:text-base font-semibold text-gray-800 tracking-wide">
+      BOOK NOW
+    </p>
+  </div>
+</Link>
     </div>
   </ModalWrapper>
 )}

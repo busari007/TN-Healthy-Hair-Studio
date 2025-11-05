@@ -1,6 +1,19 @@
+import { useLocation } from "react-router-dom";
+import { scroller } from "react-scroll";
 import logo from "../assets/images/TN-Skincare logo.jpeg";
 
 export default function Footer() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  const handleScrollLinkClick = (target) => {
+    if (isHomePage) {
+      scroller.scrollTo(target, { smooth: true, duration: 500, offset: -80 });
+    } else {
+      window.location.href = `/#${target}`;
+    }
+  };
+
   return (
     <div className="w-full bg-black text-white">
       {/* Main Footer Section */}
@@ -8,11 +21,24 @@ export default function Footer() {
         {/* Navigation */}
         <div className="flex flex-col gap-y-2">
           <h1 className="Playfair text-lg mb-1">NAVIGATION</h1>
-          <a href="/#home"><p className="Lato hover:text-[#F0CCCE]">Home</p></a>
-          <a href="/#services"><p className="Lato hover:text-[#F0CCCE]">Services</p></a>
-          <a href="/bookings"><p className="Lato hover:text-[#F0CCCE]">Bookings</p></a>
-          <a href="/payment"><p className="Lato hover:text-[#F0CCCE]">Payment</p></a>
-          <a href="/#contact"><p className="Lato hover:text-[#F0CCCE]">Contact Us</p></a>
+          <a href="/" className="Lato hover:text-[#F0CCCE]">
+            Home
+          </a>
+          <button
+            onClick={() => handleScrollLinkClick("services")}
+            className="Lato hover:text-[#F0CCCE] text-left"
+          >
+            Services
+          </button>
+          <a href="/booking" className="Lato hover:text-[#F0CCCE]">
+            Bookings
+          </a>
+          <a href="/payment" className="Lato hover:text-[#F0CCCE]">
+            Payment
+          </a>
+          <a href="/#contact" className="Lato hover:text-[#F0CCCE]">
+             Contact Us
+          </a>
         </div>
 
         {/* Socials */}

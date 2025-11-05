@@ -1,60 +1,59 @@
-import { useState } from "react";
-
-export default function PaymentTable({ data }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
-
-  // Pagination logic
-  const totalPages = Math.ceil(data.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const currentData = data.slice(startIndex, startIndex + rowsPerPage);
-
+// PaymentTable.jsx
+export default function PaymentTable({ data, onDelete, currentPage, totalPages, onPageChange }) {
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full text-left border-collapse bg-white shadow-md">
-        <thead className="bg-gray-800 text-white">
+    <div className="w-full">
+      <table className="min-w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
+        <thead className="bg-gray-100">
           <tr>
-            {["Service", "Date", "Staff", "Time", "Amount", "Status"].map((header, i) => (
-              <th key={i} className="px-6 py-3 Lato">{header}</th>
-            ))}
+            <th className="px-4 py-2">Service</th>
+            <th className="px-4 py-2">Date</th>
+            <th className="px-4 py-2">Staff</th>
+            <th className="px-4 py-2">Time</th>
+            <th className="px-4 py-2">Amount</th>
+            <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {currentData.length === 0 ? (
-            <tr>
-              <td colSpan="6" className="text-center py-4 text-gray-500">No records to display</td>
+          {data?.map((booking) => (
+            <tr key={booking.id} className="border-b hover:bg-gray-50">
+              <td className="px-4 py-2">{booking.service}</td>
+              <td className="px-4 py-2">{booking.date}</td>
+              <td className="px-4 py-2">{booking.staff}</td>
+              <td className="px-4 py-2">{booking.time}</td>
+              <td className="px-4 py-2">₦{Number(booking.amount).toLocaleString()}</td>
+              <td className="px-4 py-2">{booking.status}</td>
+              <td className="px-4 py-2">
+                <button
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md font-semibold text-sm"
+                  onClick={() => onDelete(booking.id, booking.date)}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          ) : (
-            currentData.map((tx, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50 Lato">
-                <td className="px-6 py-3">{tx.service}</td>
-                <td className="px-6 py-3">{tx.date}</td>
-                <td className="px-6 py-3">{tx.staff}</td>
-                <td className="px-6 py-3">{tx.time}</td>
-                <td className="px-6 py-3">{tx.amount}</td>
-                <td className="px-6 py-3">{tx.status}</td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-4 py-4">
+      <div className="flex justify-center items-center mt-4 gap-x-2">
         <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+          className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === 1 && "opacity-50 cursor-not-allowed"}`}
+          onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
         >
-          ◀
+          Prev
         </button>
-        <span className="font-semibold">
-          Page {currentPage} of {totalPages}
-        </span>
+
+        <span className="text-sm font-medium">{`Page ${currentPage} of ${totalPages}`}</span>
+
         <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+          className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === totalPages && "opacity-50 cursor-not-allowed"}`}
+          onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
         >
-          ▶
+          Next
         </button>
       </div>
     </div>
