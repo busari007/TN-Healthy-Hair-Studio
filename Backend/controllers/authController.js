@@ -1,6 +1,6 @@
 import { db } from "../config/firebaseConfig.js";
 
-// === USER SIGN-UP (local testing)===
+// === USER SIGN-UP ===
 export const signUpUser = async (req, res) => {
   try {
     const { firstname, lastname, email_address, password, phone_number } = req.body;
@@ -9,10 +9,14 @@ export const signUpUser = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    // Use email as Firestore document ID
     const docId = email_address.toLowerCase();
 
-    // Store user info in Firestore
+    const existingUser = await db.collection("users").doc(docId).get();
+    if (existingUser.exists) {
+      return res.status(409).json({ message: "An account with this email already exists." });
+    }
+
+    // Save new user
     await db.collection("users").doc(docId).set({
       firstname,
       lastname,
@@ -23,9 +27,10 @@ export const signUpUser = async (req, res) => {
       createdAt: new Date(),
     });
 
-    res.status(201).json({ 
-      message: `User ${firstname} ${lastname} registered successfully`, 
-      userId: docId 
+    // ✅ Return user object along with message
+    res.status(201).json({
+      message: `User ${firstname} ${lastname} registered successfully`,
+      user: { firstname, lastname, email_address, phone_number, role: "user" },
     });
   } catch (error) {
     console.error(error);
@@ -33,7 +38,7 @@ export const signUpUser = async (req, res) => {
   }
 };
 
-// === USER LOGIN (local testing)===
+// === USER LOGIN (local testing) ===
 export const loginUser = async (req, res) => {
   try {
     const { email_address, password } = req.body;
@@ -55,7 +60,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
-    // Login successful
+    // ✅ Login successful
     res.status(200).json({
       message: `Login successful for ${userData.firstname} ${userData.lastname}`,
       user: {
