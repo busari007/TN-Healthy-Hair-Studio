@@ -70,8 +70,8 @@ export default function Navbar() {
   {/* Admin links */}
   {currentUser?.role === "admin" && (
     <>
-      <RouterLink to="/admin/users" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">Users</RouterLink>
-      <RouterLink to="/admin" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">Bookings</RouterLink>
+      <RouterLink to="/admin/users" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">User's Info.</RouterLink>
+      <RouterLink to="/admin" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">User's Bookings</RouterLink>
     </>
   )}
 </div>

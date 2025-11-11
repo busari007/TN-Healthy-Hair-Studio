@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export default function TimeSelection({
   selectedDate,
@@ -31,18 +32,27 @@ export default function TimeSelection({
 
   const timeSlots = ["9:00 AM", "12:00 PM"];
 
-  const handleTimeClick = (time) => {
-    const bookingData = {
-      service: service_name,
-      amount: service_amount,
-      ...selectedDate,
-      staff: selectedStaff,
-      time,
-    };
+  const { currentUser } = useContext(AuthContext);
 
-    // Navigate and pass state
-    navigate("/payment-checkout", { state: bookingData });
+const handleTimeClick = (time) => {
+  if (!currentUser) {
+    alert("You must be signed in to book a service.");
+    return;
+  }
+
+  const bookingData = {
+    service: service_name,
+    amount: service_amount,
+    ...selectedDate,
+    staff: selectedStaff,
+    time,
+    firstname: currentUser.firstname,
+    email_address: currentUser.email_address,
   };
+
+  console.log("Booking Data:", bookingData);
+  navigate("/payment-checkout", { state: bookingData });
+};
 
   return (
     <div className="flex flex-col items-center w-full">

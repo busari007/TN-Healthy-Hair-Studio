@@ -1,10 +1,8 @@
 import express from "express";
+import { createBooking } from "../controllers/bookingController.js";
 
 const router = express.Router();
 
-// Temporary test route
-router.get("/", (req, res) => {
-  res.send("Booking routes working!");
-});
+router.post("/create", createBooking);
 
 export default router;

@@ -99,19 +99,18 @@ export default function Sidebar({ open, onClose }) {
 
 
           {/* Log In and Sign Up row */}
-          <tr className="flex w-full border-b border-gray-400 Playfair p-3">
-            <td>
-            {!currentUser ? (
-  <>
-    <a href="/signup" className="w-1/2 text-center border-r border-gray-400">Sign Up</a>
-    <a href="/signin" className="w-1/2 text-center">Log In</a>
-  </>
-) : (
-  <>
-    <button onClick={logout} className="w-full text-center">Logout</button>
-  </>
-)}</td>
-          </tr>
+          <tr className="border-b border-gray-400 Playfair">
+  <td className="p-3 text-center">
+    {!currentUser ? (
+      <>
+        <a href="/signup" className="inline-block w-1/2 border-r border-gray-400 text-center">Sign Up</a>
+        <a href="/signin" className="inline-block w-1/2 text-center">Log In</a>
+      </>
+    ) : (
+      <button onClick={logout} className="w-full text-center">Logout</button>
+    )}
+  </td>
+</tr>
         </tbody>
       </table>
     </div>

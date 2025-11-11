@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCreditCard } from "react-icons/fa";
 import { AiOutlinePayCircle } from "react-icons/ai";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -17,10 +17,33 @@ export default function Payment() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
+  useEffect(() => {
+    console.log("Booking Data:", bookingData);
+  }, []);
+
   // Handle Paystack Payment
-  const handlePaystackPayment = () => {
-    alert(`Paystack payment of ₦${amount.toLocaleString()} for ${service} simulated successfully!`);
-  };
+  const handlePaystackPayment = async () => {
+  alert(`Paystack payment of ₦${amount.toLocaleString()} for ${service} simulated successfully!`);
+  console.log("Booking Data:" + JSON.stringify(bookingData));
+  try {
+    const res = await fetch("http://localhost:5000/api/bookings/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingData),
+    });
+
+    if (res.ok) {
+      alert("Booking confirmed and saved!");
+      navigate("/"); // or home
+    } else {
+      alert("Booking failed to save!");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("An error occurred while saving booking.");
+  }
+};
+
 
   // Form validations...
   const validateCardNumber = (value) => {

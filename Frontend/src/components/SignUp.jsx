@@ -57,7 +57,7 @@ export default function SignUp() {
         setErrorMsg(data.message || "Something went wrong. Please try again.");
       }
     } catch (err) {
-      setErrorMsg("Network error. Please ensure the server is running.");
+      setErrorMsg("Network error");
     } finally {
       setLoading(false);
     }
