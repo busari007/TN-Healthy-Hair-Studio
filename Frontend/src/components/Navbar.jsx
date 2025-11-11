@@ -38,7 +38,7 @@ export default function Navbar() {
   {/* Home */}
   <RouterLink
     to="/"
-    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
   >
     Home
   </RouterLink>
@@ -46,7 +46,7 @@ export default function Navbar() {
   {/* Services */}
   <button
     onClick={() => handleScrollLinkClick("services")}
-    className="Lato text-white relative group cursor-pointer after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+    className="Lato text-white relative group cursor-pointer after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
   >
     Services
   </button>
@@ -54,7 +54,7 @@ export default function Navbar() {
   {/* Bookings */}
   <RouterLink
     to="/bookings"
-    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
   >
     Bookings
   </RouterLink>
