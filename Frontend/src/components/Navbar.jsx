@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { Link as ScrollLink, scroller } from "react-scroll";
 import Sidebar from "./Sidebar";
 import hamburger from "../assets/images/hamburger.png";
 import close from "../assets/images/close.png";
 import logo from "../assets/images/TN-Skincare logo.jpeg";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Navbar() {
+  const { currentUser, logout } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -31,37 +33,69 @@ export default function Navbar() {
         </div>
 
         {/* Nav links */}
-        <div className="hidden lg:flex flex-row gap-x-6 text-lg font-semibold">
-          {/* Home */}
-          <RouterLink to="/" className="Lato text-white relative group">Home</RouterLink>
+        {/* Nav links */}
+<div className="hidden lg:flex flex-row gap-x-6 text-lg font-semibold">
+  {/* Home */}
+  <RouterLink
+    to="/"
+    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+  >
+    Home
+  </RouterLink>
 
-          {/* Services */}
-          <button
-            onClick={() => handleScrollLinkClick("services")}
-            className="Lato text-white relative group cursor-pointer"
-          >
-            Services
-          </button>
+  {/* Services */}
+  <button
+    onClick={() => handleScrollLinkClick("services")}
+    className="Lato text-white relative group cursor-pointer after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+  >
+    Services
+  </button>
 
-          {/* Bookings */}
-          <RouterLink to="/bookings" className="Lato text-white relative group">Bookings</RouterLink>
+  {/* Bookings */}
+  <RouterLink
+    to="/bookings"
+    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+  >
+    Bookings
+  </RouterLink>
 
-          {/* Contact */}
-          <RouterLink to="/#contact" className="Lato text-white relative group">Contact Us</RouterLink>
-         
-        </div>
+  {/* Contact */}
+  <RouterLink
+    to="/#contact"
+    className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full"
+  >
+    Contact Us
+  </RouterLink>
+
+  {/* Admin links */}
+  {currentUser?.role === "admin" && (
+    <>
+      <RouterLink to="/admin/users" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">Users</RouterLink>
+      <RouterLink to="/admin" className="Lato text-white relative group after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-pink-400 after:transition-all after:duration-300 hover:after:w-full">Bookings</RouterLink>
+    </>
+  )}
+</div>
 
         {/* Right Side */}
         <div className="flex items-center gap-3 Playfair">
-          <RouterLink to="/signin" className="hidden sm:block text-white">Login</RouterLink>
-          <RouterLink to="/signup" className="hidden sm:block text-white">Sign Up</RouterLink>
-          <img
-            src={sidebarOpen ? close : hamburger}
-            alt="menu"
-            className="w-6 h-6 lg:hidden cursor-pointer"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          />
-        </div>
+  {!currentUser ? (
+    <>
+      <RouterLink to="/signin" className="hidden sm:block text-white">Login</RouterLink>
+      <RouterLink to="/signup" className="hidden sm:block text-white">Sign Up</RouterLink>
+    </>
+  ) : (
+    <>
+      <span className="text-white hidden sm:block">{currentUser.firstname}</span>
+      <button onClick={logout} className="text-white hidden sm:block hover:cursor-pointer hover:text-gray-200">Logout</button>
+    </>
+  )}
+  <img
+    src={sidebarOpen ? close : hamburger}
+    alt="menu"
+    className="w-6 h-6 lg:hidden cursor-pointer"
+    onClick={() => setSidebarOpen(!sidebarOpen)}
+  />
+</div>
       </div>
 
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />

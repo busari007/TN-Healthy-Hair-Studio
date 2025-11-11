@@ -13,10 +13,13 @@ import Payment from './components/Payment'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from './components/PrivateRoute'
 
 function App() {
   return (
     <div>
+      <AuthProvider>
       <ScrollToTop/>
       <Navbar />
 
@@ -27,10 +30,17 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/bookings" element={<PaymentPage />} />
         <Route path="/payment-checkout" element={<Payment />} />
-        <Route path="/admin/users" element={<AdminDashboard />} />
-        <Route path="/admin" element={<AdminBookingsDashboard />} />
+        <Route path="/admin/users" element={
+          <PrivateRoute role="admin">
+      <AdminDashboard />
+           </PrivateRoute>} />
+        <Route path="/admin" element={
+          <PrivateRoute role="admin">
+    <AdminBookingsDashboard />
+          </PrivateRoute>}/>
       </Routes>
       <Footer />
+      </AuthProvider>
     </div>
   )
 }

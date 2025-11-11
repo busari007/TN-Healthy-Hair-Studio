@@ -17,25 +17,23 @@ export default function AdminUsersTable({ users, onDelete }) {
       <table className="min-w-full table-auto border-collapse border border-gray-300 text-sm">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-2 border">User ID</th>
+            <th className="p-2 border">Email</th>
             <th className="p-2 border">First Name</th>
             <th className="p-2 border">Last Name</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Phone</th>
+            <th className="p-2 border">Phone Number</th>
             <th className="p-2 border">Actions</th>
           </tr>
         </thead>
         <tbody>
           {paginatedUsers.map((user) => (
             <tr key={user.userId}>
-              <td className="p-2 border">{user.userId}</td>
-              <td className="p-2 border">{user.firstName}</td>
-              <td className="p-2 border">{user.lastName}</td>
-              <td className="p-2 border">{user.email}</td>
-              <td className="p-2 border">{user.phone}</td>
+              <td className="p-2 border">{user.email_address}</td>
+              <td className="p-2 border">{user.firstname}</td>
+              <td className="p-2 border">{user.lastname}</td>
+              <td className="p-2 border">{user.phone_number}</td>
               <td className="p-2 border text-center">
                 <button
-                  onClick={() => onDelete(user.userId)}
+                  onClick={() => onDelete(user.email_address)}
                   className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
                 >
                   X

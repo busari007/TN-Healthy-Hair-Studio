@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Sidebar({ open, onClose }) {
+
+  const { currentUser, logout } = useContext(AuthContext);
 
   // Close when clicking outside the sidebar
     const sidebarRef = useRef(null);
@@ -72,25 +75,42 @@ export default function Sidebar({ open, onClose }) {
               </a>
             </td>
           </tr>
+          {/* Admin Links */}
+          {currentUser?.role === "admin" && (
+  <tr className="border-b border-gray-400">
+    <td className="py-3 px-2 w-full">
+      <div className="flex w-full">
+        <a
+          href="/admin/users"
+          className="flex-1 text-center hover:underline Playfair border-r border-gray-400"
+        >
+          Your Users
+        </a>
+        <a
+          href="/admin"
+          className="flex-1 text-center hover:underline Playfair"
+        >
+          The Bookings
+        </a>
+      </div>
+    </td>
+  </tr>
+)}
+
 
           {/* Log In and Sign Up row */}
-          <tr className="flex w-full border-b border-gray-400 Playfair">
-            <td className="w-1/2 text-center border-r border-gray-400">
-              <a
-                href="/signup"
-                className="block py-3 px-3 hover:bg-gray-100 w-full h-full"
-              >
-                Sign Up
-              </a>
-            </td>
-            <td className="w-1/2 text-center">
-              <a
-                href="/signin"
-                className="block py-3 px-3 hover:bg-gray-100 w-full h-full"
-              >
-                Log In
-              </a>
-            </td>
+          <tr className="flex w-full border-b border-gray-400 Playfair p-3">
+            <td>
+            {!currentUser ? (
+  <>
+    <a href="/signup" className="w-1/2 text-center border-r border-gray-400">Sign Up</a>
+    <a href="/signin" className="w-1/2 text-center">Log In</a>
+  </>
+) : (
+  <>
+    <button onClick={logout} className="w-full text-center">Logout</button>
+  </>
+)}</td>
           </tr>
         </tbody>
       </table>
