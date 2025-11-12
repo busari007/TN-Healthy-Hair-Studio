@@ -112,7 +112,7 @@ export default function Payment() {
         {/* Payment selection */}
         <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6 Lato">
           <button
-            className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+            className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-lg font-semibold transition hover:cursor-pointer ${
               method === "paystack"
                 ? "bg-[#F0CCCE] text-black"
                 : "border border-gray-300 text-gray-600"
@@ -124,7 +124,7 @@ export default function Payment() {
           </button>
 
           <button
-            className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-lg font-semibold transition ${
+            className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-lg font-semibold transition hover:cursor-pointer ${
               method === "debit"
                 ? "bg-[#F0CCCE] text-black"
                 : "border border-gray-300 text-gray-600"
@@ -141,7 +141,7 @@ export default function Payment() {
           <div className="text-center mt-6">
             <button
               onClick={handlePaystackPayment}
-              className="w-full bg-[#F0CCCE] hover:bg-[#e8b9bc] py-2 px-4 rounded-lg font-semibold shadow-md transition text-gray-800"
+              className="w-full bg-[#F0CCCE] hover:bg-[#e8b9bc] py-2 px-4 rounded-lg font-semibold shadow-md transition text-gray-800 hover:cursor-pointer"
             >
               Pay with Paystack
             </button>
@@ -189,7 +189,7 @@ export default function Payment() {
 
             <button
               type="submit"
-              className="w-full bg-[#F0CCCE] hover:bg-[#e8b9bc] py-2 px-4 rounded-lg font-semibold shadow-md transition text-gray-800"
+              className="w-full hover:cursor-pointer bg-[#F0CCCE] hover:bg-[#e8b9bc] py-2 px-4 rounded-lg font-semibold shadow-md transition text-gray-800"
             >
               Pay with Debit Card
             </button>

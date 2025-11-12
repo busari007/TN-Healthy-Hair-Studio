@@ -2,72 +2,86 @@ import { useState, useEffect } from "react";
 import AdminBookingSearch from "./AdminBookingSearch";
 import AdminBookingsTable from "./AdminBookingsTable";
 import PendingBookings from "./PendingBookings";
-import { dummyData } from "./dummyData";
 import ConfirmationModal from "./ConfirmationModal";
 
-/**
- * Parent admin dashboard for bookings.
- *
- * Props: optionally you can pass an initial `initialBookings` array:
- * [
- *   { userId, client, service, date, staff, time, amount, status },
- *   ...
- * ]
- *
- * If you don't pass initialBookings, the component starts with an empty array.
- *
- * NOTE: Replace the "simulateFetch" implementation with real fetch/axios calls
- * to your backend when ready.
- */
 export default function AdminBookingsDashboard() {
-  const [bookings, setBookings] = useState([...dummyData]);
-  const [searchResults, setSearchResults] = useState(null); // null => no active search
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [lastCreatedAt, setLastCreatedAt] = useState(null);
+  const [hasMore, setHasMore] = useState(true); // to disable "Load More" if no more data
+  const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
-
-  // confirmation modal state: mode = "pending" or "delete"
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
-    mode: null, // "pending" or "delete"
+    mode: null,
     booking: null,
   });
 
-  // Placeholder: polling every 15 seconds to refresh bookings from backend
-  useEffect(() => {
-    // Replace simulateFetch() with real backend call
-    const simulateFetch = () => {
-      // No-op for now (use dummyData)
-    };
+  // 🔹 Fetch bookings (first 20 or paginated)
+  const fetchBookings = async (loadMore = false) => {
+    if (loading) return;
+    setLoading(true);
 
-    simulateFetch();
-    const interval = setInterval(() => {
-      if (!isSearching) simulateFetch();
-    }, 15000);
+    try {
+      let url = "http://localhost:5000/api/bookings/recent";
+      if (loadMore && lastCreatedAt) {
+        url += `?lastCreatedAt=${encodeURIComponent(lastCreatedAt)}`;
+      }
 
-    return () => clearInterval(interval);
-  }, [isSearching]);
+      const res = await fetch(url);
+      const data = await res.json();
 
-  // Delete booking handler (updates local state)
+      if (res.ok) {
+        const fetched = data.bookings || [];
+        console.log(data.bookings);
+        if (fetched.length < 20) setHasMore(false); // no more records
+        if (loadMore) {
+          setBookings((prev) => [...prev, ...fetched]);
+        } else {
+          setBookings(fetched);
+        }
+
+        // Save cursor: last document’s createdAt
+        const last = fetched[fetched.length - 1];
+        if (last) setLastCreatedAt(last.createdAt);
+      } else {
+        console.error("Error fetching:", data.error);
+      }
+    } catch (err) {
+      console.error("Error loading bookings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Initial load
+ useEffect(() => {
+  fetchBookings();
+
+  // Set interval to run every 5 seconds
+  const intervalId = setInterval(() => {
+    fetchBookings();
+  }, 5000);
+
+  // Cleanup interval on unmount
+  return () => clearInterval(intervalId);
+}, []);
+
+  // 🔹 Handlers (same as before)
   const handleDelete = (userId) => {
-    // OPTIONAL: call your backend to delete first, then update UI
-    // fetch(`/api/bookings/${userId}`, { method: 'DELETE' })...
     setBookings((prev) => prev.filter((b) => b.userId !== userId));
-    // If search is active, remove from results too
     setSearchResults((prev) => (prev ? prev.filter((b) => b.userId !== userId) : prev));
   };
 
-  // Mark booking as Completed or Cancelled handler
   const handleStatusUpdate = (userId, newStatus) => {
     setBookings((prev) =>
       prev.map((b) => (b.userId === userId ? { ...b, status: newStatus } : b))
     );
-
-    // If search is active, update there too
     setSearchResults((prev) =>
       prev ? prev.map((b) => (b.userId === userId ? { ...b, status: newStatus } : b)) : prev
     );
   };
 
-  // Called by search component with data (array). When search active, table uses searchResults
   const handleSearchResults = (results) => {
     setIsSearching(true);
     setSearchResults(results);
@@ -78,17 +92,14 @@ export default function AdminBookingsDashboard() {
     setSearchResults(null);
   };
 
-  // Open confirmation modal: mode = "pending" (Confirm/Reject) or "delete" (delete row)
   const openConfirmation = (mode, booking) => {
     setConfirmationModal({ isOpen: true, mode, booking });
   };
 
-  // Close modal
   const closeConfirmation = () => {
     setConfirmationModal({ isOpen: false, mode: null, booking: null });
   };
 
-  // Data to pass to tables (search results override live bookings)
   const tableData = searchResults ?? bookings;
 
   return (
@@ -96,7 +107,7 @@ export default function AdminBookingsDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="Playfair text-2xl md:text-3xl">Admin — Bookings</h1>
         <p className="text-sm text-gray-600">
-          Showing {tableData.length} record{tableData.length !== 1 ? "s" : ""} (top 20 kept client-side)
+          Showing {tableData.length} record{tableData.length !== 1 ? "s" : ""} (20 per page)
         </p>
       </div>
 
@@ -130,7 +141,20 @@ export default function AdminBookingsDashboard() {
       {/* Bookings table */}
       <AdminBookingsTable bookings={tableData} onOpenConfirmation={openConfirmation} />
 
-      {/* Pending bookings (only pending statuses) */}
+      {/* Load More button */}
+      {!isSearching && hasMore && (
+        <div className="text-center mt-6">
+          <button
+            onClick={() => fetchBookings(true)}
+            disabled={loading}
+            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+          >
+            {loading ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
+
+      {/* Pending bookings */}
       <PendingBookings bookings={tableData} onOpenConfirmation={openConfirmation} />
     </div>
   );

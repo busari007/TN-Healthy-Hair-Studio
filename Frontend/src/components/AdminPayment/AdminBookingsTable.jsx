@@ -13,7 +13,7 @@ import { useState, useMemo } from "react";
  * Expected booking fields:
  * { userId, client, service, date (YYYY-MM-DD), staff, time, amount, status }
  */
-export default function AdminBookingsTable({ bookings = [], onOpenConfirmation }) {
+export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
   const [page, setPage] = useState(1);
   const perPage = 5;
 
@@ -49,8 +49,8 @@ export default function AdminBookingsTable({ bookings = [], onOpenConfirmation }
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 text-left">User ID</th>
-              <th className="p-2 text-left">Client</th>
+              <th className="p-2 text-left">Email</th>
+              <th className="p-2 text-left">Client Name</th>
               <th className="p-2 text-left">Service</th>
               <th className="p-2 text-left">Date</th>
               <th className="p-2 text-left">Staff</th>
@@ -71,10 +71,10 @@ export default function AdminBookingsTable({ bookings = [], onOpenConfirmation }
             ) : (
               visible.map((b) => (
                 <tr key={b.userId} className={`${rowClassForStatus(b.status)} border-b`}>
-                  <td className="p-2">{b.userId}</td>
-                  <td className="p-2">{b.client}</td>
+                  <td className="p-2">{b.email_address}</td>
+                  <td className="p-2">{b.firstname}</td>
                   <td className="p-2">{b.service}</td>
-                  <td className="p-2">{b.date}</td>
+                  <td className="p-2">{`${b.day}`+ "\\" + `${b.month}`+ "\\" + `${b.year}`}</td>
                   <td className="p-2">{b.staff}</td>
                   <td className="p-2">{b.time}</td>
                   <td className="p-2">{b.amount}</td>
