@@ -1,11 +1,5 @@
 import { useMemo, useState } from "react";
 
-/**
- * Shows only bookings where status === "Pending"
- * Props: bookings (array), onOpenConfirmation(mode, booking)
- *
- * Paginated (20 per page) to match other tables
- */
 export default function PendingBookings({ bookings = [], onOpenConfirmation }) {
   const pending = useMemo(
     () => (bookings || []).filter((b) => (b.status || "").toLowerCase() === "pending"),
@@ -22,8 +16,8 @@ export default function PendingBookings({ bookings = [], onOpenConfirmation }) {
       <h2 className="text-lg font-semibold mb-3">Pending Bookings</h2>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
+        <table className="min-w-full text-sm border-collapse">
+          <thead className="bg-gray-100 border-b">
             <tr>
               <th className="p-2 text-left">User ID</th>
               <th className="p-2 text-left">Client</th>
@@ -45,30 +39,35 @@ export default function PendingBookings({ bookings = [], onOpenConfirmation }) {
               </tr>
             ) : (
               visible.map((b) => (
-                <tr key={b.userId} className="bg-orange-50 border-b">
+                <tr
+                  key={b.userId}
+                  className="bg-orange-50 border-b hover:bg-gray-50 transition-colors"
+                >
                   <td className="p-2">{b.userId}</td>
-                  <td className="p-2">{b.client}</td>
+                  <td className="p-2">{b.firstname}</td>
                   <td className="p-2">{b.service}</td>
-                  <td className="p-2">{b.date}</td>
+                  <td className="p-2">{`${b.day}\\${b.month}\\${b.year}`}</td>
                   <td className="p-2">{b.staff}</td>
                   <td className="p-2">{b.time}</td>
                   <td className="p-2">{b.amount}</td>
 
-                  <td className="p-2 text-center flex gap-2 justify-center">
-                    <button
-                      onClick={() => onOpenConfirmation("pending", b)}
-                      className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
-                      title="Confirm or Reject booking"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={() => onOpenConfirmation("pending", b)}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                      title="Confirm or Reject booking"
-                    >
-                      X
-                    </button>
+                  <td className="p-2 text-center">
+                    <div className="inline-flex gap-2 justify-center">
+                      <button
+                        onClick={() => onOpenConfirmation("pending", b)}
+                        className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                        title="Confirm booking"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => onOpenConfirmation("pending", b)}
+                        className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                        title="Reject booking"
+                      >
+                        X
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

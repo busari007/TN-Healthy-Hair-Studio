@@ -33,7 +33,6 @@ export default function AdminBookingsDashboard() {
 
       if (res.ok) {
         const fetched = data.bookings || [];
-        console.log(data.bookings);
         if (fetched.length < 20) setHasMore(false); // no more records
         if (loadMore) {
           setBookings((prev) => [...prev, ...fetched]);
@@ -68,19 +67,45 @@ export default function AdminBookingsDashboard() {
 }, []);
 
   // 🔹 Handlers (same as before)
-  const handleDelete = (userId) => {
-    setBookings((prev) => prev.filter((b) => b.userId !== userId));
-    setSearchResults((prev) => (prev ? prev.filter((b) => b.userId !== userId) : prev));
-  };
-
-  const handleStatusUpdate = (userId, newStatus) => {
+  const handleStatusUpdate = async (booking, newStatus) => {
+  try {
+    // Optimistic UI update
     setBookings((prev) =>
-      prev.map((b) => (b.userId === userId ? { ...b, status: newStatus } : b))
+      prev.map((b) => (b.id === booking.id ? { ...b, status: newStatus } : b))
     );
-    setSearchResults((prev) =>
-      prev ? prev.map((b) => (b.userId === userId ? { ...b, status: newStatus } : b)) : prev
-    );
-  };
+
+    // Persist to backend
+    await fetch("http://localhost:5000/api/bookings/update-status", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email_address: booking.email_address,
+        bookingId: booking.id,
+        status: newStatus,
+      }),
+    });
+  } catch (err) {
+    console.error("Error updating booking:", err);
+  }
+};
+
+const handleDelete = async (booking) => {
+  try {
+    // Optimistic UI removal
+    setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+
+    await fetch("http://localhost:5000/api/bookings/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email_address: booking.email_address,
+        bookingId: booking.id,
+      }),
+    });
+  } catch (err) {
+    console.error("Error deleting booking:", err);
+  }
+};
 
   const handleSearchResults = (results) => {
     setIsSearching(true);

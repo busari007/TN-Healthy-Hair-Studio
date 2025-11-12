@@ -1,15 +1,5 @@
 import ModalWrapper from "../ModalWrapper";
 
-/**
- * Props:
- * - isOpen: boolean
- * - mode: "pending" | "delete"
- * - booking: the booking object (must have .client and .service)
- * - onClose: () => void
- * - onApprove: (userId) => void   // for pending -> Completed
- * - onReject: (userId) => void    // for pending -> Cancelled
- * - onDelete: (userId) => void    // for deleting rows (completed/cancelled)
- */
 export default function ConfirmationModal({
   isOpen,
   mode,
@@ -21,12 +11,10 @@ export default function ConfirmationModal({
 }) {
   if (!isOpen || !booking) return null;
 
-  // Use booking.client and booking.service (your data uses these keys)
-  const client = booking.client ?? booking.clientName ?? "Client";
+  const client = booking.firstname ?? booking.client ?? booking.clientName ?? "Client";
   const service = booking.service ?? booking.serviceName ?? "";
-
-  // If mode is 'pending' or booking.status is 'Pending', show Confirm/Reject wording
-  const isPendingMode = mode === "pending" || (booking.status || "").toLowerCase() === "pending";
+  const isPendingMode =
+    mode === "pending" || (booking.status || "").toLowerCase() === "pending";
 
   return (
     <ModalWrapper isOpen={isOpen} onClose={onClose}>
@@ -41,13 +29,13 @@ export default function ConfirmationModal({
           {isPendingMode ? (
             <>
               <button
-                onClick={() => onApprove(booking.userId)}
+                onClick={() => onApprove(booking)} // ✅ pass the whole booking
                 className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700"
               >
                 Confirm (Approve)
               </button>
               <button
-                onClick={() => onReject(booking.userId)}
+                onClick={() => onReject(booking)} // ✅ pass the whole booking
                 className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700"
               >
                 Reject (Cancel)
@@ -62,7 +50,7 @@ export default function ConfirmationModal({
           ) : (
             <>
               <button
-                onClick={() => onDelete(booking.userId)}
+                onClick={() => onDelete(booking)} // ✅ pass the whole booking
                 className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700"
               >
                 Confirm Delete

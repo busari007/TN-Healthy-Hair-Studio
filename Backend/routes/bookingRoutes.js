@@ -1,11 +1,18 @@
 import express from "express";
-import { createBooking, getRecentBookings } from "../controllers/bookingController.js";
-import { searchBookings } from "../controllers/bookingController.js";
+import {
+  createBooking,
+  getRecentBookings,
+  searchBookings,
+  updateBookingStatus,
+  deleteBooking
+} from "../controllers/bookingController.js";
 
 const router = express.Router();
 
 router.post("/create", createBooking);
-router.get("/recent", getRecentBookings); // 👈 new route
-router.get("/search", searchBookings); //search route
+router.get("/recent", getRecentBookings);
+router.get("/search", searchBookings);
+router.patch("/update-status", updateBookingStatus); // ✅ New
+router.delete("/delete", deleteBooking);             // ✅ New
 
 export default router;

@@ -128,3 +128,62 @@ export const searchBookings = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// 🔹 Update booking status
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { email_address, bookingId, status } = req.body;
+
+    if (!email_address || !bookingId || !status) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Rebuild user_email key (same format used during creation)
+    const user_email = email_address
+      .replace(/[^\w\s@.]/gi, "")
+      .replace(/[.@]/g, "_")
+      .toLowerCase();
+
+    const bookingRef = db
+      .collection("bookings")
+      .doc(user_email)
+      .collection("user_bookings")
+      .doc(bookingId);
+
+    await bookingRef.update({ status });
+
+    res.status(200).json({ message: `Booking ${bookingId} updated to ${status}` });
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// 🔹 Delete booking
+export const deleteBooking = async (req, res) => {
+  try {
+    const { email_address, bookingId } = req.body;
+
+    if (!email_address || !bookingId) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const user_email = email_address
+      .replace(/[^\w\s@.]/gi, "")
+      .replace(/[.@]/g, "_")
+      .toLowerCase();
+
+    const bookingRef = db
+      .collection("bookings")
+      .doc(user_email)
+      .collection("user_bookings")
+      .doc(bookingId);
+
+    await bookingRef.delete();
+
+    res.status(200).json({ message: `Booking ${bookingId} deleted successfully` });
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

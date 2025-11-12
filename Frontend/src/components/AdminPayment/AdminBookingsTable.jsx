@@ -1,27 +1,16 @@
 import { useState, useMemo } from "react";
 
-/**
- * Props:
- * - bookings: array of booking objects
- * - onOpenConfirmation(mode, booking): function to open modal in parent
- *
- * Table is paginated (20 per page) and color-codes rows by `status`:
- * - "Completed" => green-ish row
- * - "Pending"   => orange-ish row
- * - "Cancelled" => red-ish row
- *
- * Expected booking fields:
- * { userId, client, service, date (YYYY-MM-DD), staff, time, amount, status }
- */
 export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
   const [page, setPage] = useState(1);
   const perPage = 5;
 
-  // Ensure most recent on top (assuming userId or timestamp indicates recency)
+  // Sort newest first
   const sorted = useMemo(() => {
     return [...bookings].sort((a, b) => {
-      // attempt numeric compare on userId if possible, else fallback to string
-      if (!isNaN(a.userId) && !isNaN(b.userId)) return b.userId - a.userId;
+      // Sort by createdAt if available, else fallback to date
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
       return (b.date || "").localeCompare(a.date || "");
     });
   }, [bookings]);
@@ -46,8 +35,8 @@ export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
       <h2 className="text-lg font-semibold mb-3">Bookings Table</h2>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
+        <table className="min-w-full text-sm border-collapse">
+          <thead className="bg-gray-100 border-b">
             <tr>
               <th className="p-2 text-left">Email</th>
               <th className="p-2 text-left">Client Name</th>
@@ -69,12 +58,15 @@ export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
                 </td>
               </tr>
             ) : (
-              visible.map((b) => (
-                <tr key={b.userId} className={`${rowClassForStatus(b.status)} border-b`}>
+              visible.map((b, index) => (
+                <tr
+                  key={b.id || b.bookingId || `${b.email_address}-${index}`} // ✅ Unique fallback
+                  className={`${rowClassForStatus(b.status)} border-b hover:bg-gray-50`}
+                >
                   <td className="p-2">{b.email_address}</td>
                   <td className="p-2">{b.firstname}</td>
                   <td className="p-2">{b.service}</td>
-                  <td className="p-2">{`${b.day}`+ "\\" + `${b.month}`+ "\\" + `${b.year}`}</td>
+                  <td className="p-2">{`${b.day}\\${b.month}\\${b.year}`}</td>
                   <td className="p-2">{b.staff}</td>
                   <td className="p-2">{b.time}</td>
                   <td className="p-2">{b.amount}</td>
@@ -94,27 +86,25 @@ export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
                     </span>
                   </td>
 
-                  <td className="p-2 text-center flex gap-2 justify-center">
-                    {/* If pending -> show both action buttons but both open the pending confirm/reject modal */}
+                  <td className="p-2 text-center">
                     {b.status === "Pending" ? (
-                      <>
+                      <div className="inline-flex gap-2">
                         <button
                           onClick={() => onOpenConfirmation("pending", b)}
                           className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
-                          title="Confirm or Reject booking"
+                          title="Confirm booking"
                         >
                           ✓
                         </button>
                         <button
                           onClick={() => onOpenConfirmation("pending", b)}
                           className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                          title="Confirm or Reject booking"
+                          title="Reject booking"
                         >
                           X
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      // If Completed/Cancelled -> show delete action (deletes row)
                       <button
                         onClick={() => onOpenConfirmation("delete", b)}
                         className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
@@ -131,7 +121,6 @@ export default function AdminBookingsTable({ bookings, onOpenConfirmation }) {
         </table>
       </div>
 
-      {/* Pagination controls: arrows + centered page number */}
       <div className="flex items-center justify-center gap-4 mt-4">
         <button
           onClick={prev}
