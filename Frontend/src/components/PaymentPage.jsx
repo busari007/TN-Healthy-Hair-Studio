@@ -1,34 +1,61 @@
-// PaymentPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import PaymentTable from "./PaymentTable";
-
-const generateDummyData = () =>
-  Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    service: `Service ${i + 1}`,
-    date: `2025-11-${(i % 30) + 1}`,
-    staff: `Staff ${(i % 5) + 1}`,
-    time: i % 2 === 0 ? "9:00 AM" : "12:00 PM",
-    amount: `${40000 + i * 10000}`,
-    status: i % 3 === 0 ? "Pending" : i % 3 === 1 ? "Completed" : "Cancelled",
-  })).sort((a, b) => new Date(b.date) - new Date(a.date));
+import { AuthContext } from "../context/AuthContext";
 
 export default function PaymentPage() {
-  const [transactions, setTransactions] = useState(generateDummyData());
+  const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const fetchTransactions = () => {
-    console.log("Refreshing latest transactions...");
-    setTransactions(generateDummyData());
+  const { currentUser } = useContext(AuthContext);
+
+  // ✅ Get the user's email directly from the AuthContext
+  const userEmail = currentUser?.email_address;
+
+  // Fetch this user's bookings
+  const fetchUserBookings = async () => {
+    try {
+      if (!userEmail) {
+        console.warn("⚠️ No user email found in AuthContext");
+        setLoading(false);
+        return;
+      }
+
+      const encodedEmail = encodeURIComponent(userEmail);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/bookings/user/${encodedEmail}`
+      );
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (data.bookings) {
+        // Sort newest first
+        const sorted = data.bookings.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setTransactions(sorted);
+      } else {
+        setTransactions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching user bookings:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // 🔁 Auto-refresh every 15 seconds
   useEffect(() => {
+    fetchUserBookings();
+
     const interval = setInterval(() => {
-      if (!filteredTransactions) fetchTransactions();
+      if (!filteredTransactions) fetchUserBookings();
     }, 15000);
+
     return () => clearInterval(interval);
-  }, [filteredTransactions]);
+  }, [userEmail, filteredTransactions]);
 
   const handleSearchResults = (data) => {
     setFilteredTransactions(data);
@@ -40,10 +67,11 @@ export default function PaymentPage() {
     setCurrentPage(1);
   };
 
-  const handleDeleteBooking = (id, bookingDate) => {
+  const handleDeleteBooking = async (bookingId, bookingDate) => {
+    if (!userEmail) return alert("User email missing. Please sign in again.");
+
     const today = new Date();
     const booking = new Date(bookingDate);
-
     const timeDiff = booking.getTime() - today.getTime();
     const hoursDiff = timeDiff / (1000 * 60 * 60);
 
@@ -52,14 +80,31 @@ export default function PaymentPage() {
       return;
     }
 
-    console.log(`Deleting booking with ID: ${id}`);
-    setTransactions((prev) => prev.filter((transaction) => transaction.id !== id));
-    alert("Booking successfully cancelled and removed.");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/bookings/delete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email_address: userEmail,
+            bookingId,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to delete booking");
+
+      setTransactions((prev) => prev.filter((t) => t.id !== bookingId));
+      alert("Booking successfully cancelled and removed.");
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      alert("Error deleting booking. Try again later.");
+    }
   };
 
   const pageSize = 5;
   const activeData = filteredTransactions || transactions;
-
   const paginatedData = activeData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -67,15 +112,26 @@ export default function PaymentPage() {
   const totalPages = Math.ceil(activeData.length / pageSize);
 
   return (
-    <div className="flex flex-col items-center justify-center max-w-7xl mx-auto p-4 mt-5 min-h-screen text-center">
-      <h1 className="text-3xl lg:text-4xl Playfair font-semibold mb-8">Your Bookings History</h1>
-      <PaymentTable
-        data={paginatedData}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        onDelete={handleDeleteBooking}
-      />
+   <div className="flex flex-col items-center justify-center max-w-7xl mx-auto p-4 mt-5 min-h-screen text-center space-y-6">
+  <h1 className="text-3xl lg:text-4xl Playfair font-semibold mb-8">
+    Your Booking History
+  </h1>
+
+  {loading ? (
+    <p className="text-gray-500">Loading your bookings...</p>
+  ) : (
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[700px]">
+        <PaymentTable
+          data={paginatedData}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          onDelete={handleDeleteBooking}
+        />
+      </div>
     </div>
+  )}
+</div>
   );
 }

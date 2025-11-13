@@ -11,26 +11,17 @@ export default function PaymentTable({ data, onDelete, currentPage, totalPages, 
             <th className="px-4 py-2">Time</th>
             <th className="px-4 py-2">Amount</th>
             <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {data?.map((booking) => (
             <tr key={booking.id} className="border-b hover:bg-gray-50">
               <td className="px-4 py-2">{booking.service}</td>
-              <td className="px-4 py-2">{booking.date}</td>
+              <td className="px-4 py-2">{`${booking.day}\\${booking.month}\\${booking.year}`}</td>
               <td className="px-4 py-2">{booking.staff}</td>
               <td className="px-4 py-2">{booking.time}</td>
               <td className="px-4 py-2">₦{Number(booking.amount).toLocaleString()}</td>
               <td className="px-4 py-2">{booking.status}</td>
-              <td className="px-4 py-2">
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md font-semibold text-sm"
-                  onClick={() => onDelete(booking.id, booking.date)}
-                >
-                  Delete
-                </button>
-              </td>
             </tr>
           ))}
         </tbody>

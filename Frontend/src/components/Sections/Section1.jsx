@@ -27,11 +27,11 @@ export default function Section1() {
       <div className="absolute inset-0 bg-black/30 lg:bg-black/30 z-10"></div>
 
       {/* Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center text-white text-center mt-20 lg:mt-45">
+      <div className="relative z-20 flex flex-col items-center justify-center text-white text-center mt-20 lg:mt-40">
         {/* Header */}
         <h1 className="Playfair text-4xl lg:text-5xl xl:text-6xl leading-tight lg:leading-[1.15] drop-shadow-md">
-          Where Beauty <br className="lg:hidden" />
-          Blooms <br className="hidden lg:block" />
+          Where Beauty <br className="lg:hidden"/>
+          Blooms <br className="hidden lg:block"/>
           In Stillness
         </h1>
 
@@ -41,7 +41,7 @@ export default function Section1() {
         </p>
 
         {/* CTA Button */}
-        <a href="/#services" className="z-30 mt-12 md:mt-20 lg:mt-28">
+        <a href="/#services" className="z-30 mt-12 md:mt-16">
           <div className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2 bg-[#F0CCCE] rounded-2xl cursor-pointer hover:bg-[#e8b9bc] transition-colors duration-300 shadow-lg hover:shadow-xl">
             <p className="Jakarta text-[11px] md:text-base font-semibold text-gray-800 tracking-wide">
               VIEW ALL TREATMENTS

@@ -9,7 +9,13 @@ import { db } from "./config/firebaseConfig.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // or "http://localhost:5173" for tighter security
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 app.use(express.json());
 
 // Routes

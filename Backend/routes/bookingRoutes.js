@@ -4,7 +4,11 @@ import {
   getRecentBookings,
   searchBookings,
   updateBookingStatus,
-  deleteBooking
+  deleteBooking,
+  getUserBookings,
+  getBookedDates,
+  checkStaffAvailability,
+  getBookedTimes
 } from "../controllers/bookingController.js";
 
 const router = express.Router();
@@ -12,7 +16,11 @@ const router = express.Router();
 router.post("/create", createBooking);
 router.get("/recent", getRecentBookings);
 router.get("/search", searchBookings);
-router.patch("/update-status", updateBookingStatus); // ✅ New
-router.delete("/delete", deleteBooking);             // ✅ New
+router.patch("/update-status", updateBookingStatus); 
+router.delete("/delete", deleteBooking);             
+router.get("/user/:email", getUserBookings);
+router.get("/booked-dates", getBookedDates);
+router.get("/check-staff-availability", checkStaffAvailability);
+router.get("/booked-times", getBookedTimes);
 
 export default router;

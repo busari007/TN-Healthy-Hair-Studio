@@ -10,49 +10,75 @@ export default function TimeSelection({
 }) {
   const [bookedTimes, setBookedTimes] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Dummy data
-    const dummyBooked = [
-      { staff: "Mrs. Ebun", date: "2025-10-31", time: "9:00 AM" },
-      { staff: "Ayomide", date: "2025-10-31", time: "12:00 PM" },
-    ];
-
-    const dateStr = `${selectedDate.year}-${String(selectedDate.month).padStart(
-      2,
-      "0"
-    )}-${String(selectedDate.day).padStart(2, "0")}`;
-
-    const filtered = dummyBooked
-      .filter((b) => b.staff === selectedStaff && b.date === dateStr)
-      .map((b) => b.time);
-
-    setBookedTimes(filtered);
-  }, [selectedDate, selectedStaff]);
+  const { currentUser } = useContext(AuthContext);
 
   const timeSlots = ["9:00 AM", "12:00 PM"];
 
-  const { currentUser } = useContext(AuthContext);
+  useEffect(() => {
+    if (!selectedDate || !selectedStaff) return;
 
-const handleTimeClick = (time) => {
-  if (!currentUser) {
-    alert("You must be signed in to book a service.");
-    return;
-  }
+    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const { day, month, year } = selectedDate;
 
-  const bookingData = {
-    service: service_name,
-    amount: service_amount,
-    ...selectedDate,
-    staff: selectedStaff,
-    time,
-    firstname: currentUser.firstname,
-    email_address: currentUser.email_address,
+    // --- Initial Fetch ---
+    const fetchInitial = async () => {
+      try {
+        const res = await fetch(
+          `${apiBase}/api/bookings/booked-times?staff=${encodeURIComponent(
+            selectedStaff
+          )}&day=${day}&month=${month}&year=${year}`
+        );
+        const data = await res.json();
+        setBookedTimes(data.bookedTimes || []);
+      } catch (err) {
+        console.error("Error fetching booked times:", err);
+      }
+    };
+
+    fetchInitial();
+
+    // --- Realtime Stream (SSE) ---
+    const eventSource = new EventSource(
+      `${apiBase}/api/bookings/booked-times/stream?staff=${encodeURIComponent(
+        selectedStaff
+      )}&day=${day}&month=${month}&year=${year}`
+    );
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setBookedTimes(data.bookedTimes || []);
+    };
+
+    eventSource.onerror = (err) => {
+      console.error("Realtime stream error:", err);
+      eventSource.close();
+    };
+
+    // Cleanup listener on unmount
+    return () => {
+      eventSource.close();
+    };
+  }, [selectedDate, selectedStaff]);
+
+  const handleTimeClick = (time) => {
+    if (!currentUser) {
+      alert("You must be signed in to book a service.");
+      return;
+    }
+
+    const bookingData = {
+      service: service_name,
+      amount: service_amount,
+      ...selectedDate,
+      staff: selectedStaff,
+      time,
+      firstname: currentUser.firstname,
+      email_address: currentUser.email_address,
+    };
+
+    console.log("Booking Data:", bookingData);
+    navigate("/payment-checkout", { state: bookingData });
   };
-
-  console.log("Booking Data:", bookingData);
-  navigate("/payment-checkout", { state: bookingData });
-};
 
   return (
     <div className="flex flex-col items-center w-full">

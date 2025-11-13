@@ -34,7 +34,7 @@ export default function Payment() {
 
     if (res.ok) {
       alert("Booking confirmed and saved!");
-      navigate("/"); // or home
+      navigate("/bookings"); // navigates to booking upon successful booking
     } else {
       alert("Booking failed to save!");
     }

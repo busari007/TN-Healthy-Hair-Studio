@@ -186,4 +186,190 @@ export const deleteBooking = async (req, res) => {
     console.error("Error deleting booking:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+}; 
+
+export const getUserBookings = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const user_email = email
+      .replace(/[^\w\s@.]/gi, "")
+      .replace(/[.@]/g, "_")
+      .toLowerCase();
+
+    const snapshot = await db
+      .collection("bookings")
+      .doc(user_email)
+      .collection("user_bookings")
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const bookings = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate
+        ? doc.data().createdAt.toDate().toISOString()
+        : null,
+    }));
+
+    res.status(200).json({ bookings });
+  } catch (error) {
+    console.error("Error fetching user bookings:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
+
+// 🔹 Get all booked dates (day, month, year)
+export const getBookedDates = async (req, res) => {
+  try {
+    const snapshot = await db.collectionGroup("user_bookings").get();
+
+    // Helper to normalize time formatting (e.g. "9:00 AM" → "9:00AM")
+    const normalize = (t) => (t ? t.replace(/\s/g, "").toUpperCase() : "");
+
+    // Track bookings by date and staff
+    const bookingsByDate = {};
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const { day, month, year, staff, time } = data;
+      if (!day || !month || !year || !staff || !time) return;
+
+      const key = `${day}-${month}-${year}`;
+      if (!bookingsByDate[key]) bookingsByDate[key] = {};
+      if (!bookingsByDate[key][staff]) bookingsByDate[key][staff] = [];
+
+      bookingsByDate[key][staff].push(normalize(time));
+    });
+
+    const allStaff = ["Mrs. Ebun", "Stephanie", "Ayomide"];
+    const requiredTimes = ["9:00AM", "12:00PM"].map(normalize);
+
+    // ✅ A date is fully booked if *all staff* have *both required times* booked
+    const fullyBookedDates = Object.entries(bookingsByDate)
+      .filter(([_, staffBookings]) =>
+        allStaff.every(
+          (staff) =>
+            staffBookings[staff] &&
+            requiredTimes.every((t) => staffBookings[staff].includes(t))
+        )
+      )
+      .map(([key]) => {
+        const [day, month, year] = key.split("-").map(Number);
+        return { day, month, year };
+      });
+
+    res.status(200).json({ bookedDates: fullyBookedDates });
+  } catch (error) {
+    console.error("Error fetching booked dates:", error);
+    res.status(500).json({ error: "Failed to fetch booked dates" });
+  }
+};
+
+// 🔹 Check staff availability for a given date
+export const checkStaffAvailability = async (req, res) => {
+  try {
+    const { staff, day, month, year } = req.query;
+
+    if (!staff || !day || !month || !year) {
+      return res.status(400).json({ error: "Missing required query parameters" });
+    }
+
+    const snapshot = await db.collectionGroup("user_bookings")
+      .where("staff", "==", staff)
+      .where("day", "==", Number(day))
+      .where("month", "==", Number(month))
+      .where("year", "==", Number(year))
+      .get();
+
+    // Normalize time strings to remove spaces for consistent comparison
+    const bookedTimes = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.time) {
+        // Remove extra spaces and make AM/PM uppercase
+        bookedTimes.push(data.time.replace(/\s+/g, "").toUpperCase()); // "9:00AM", "12:00PM"
+      }
+    });
+
+    res.status(200).json({ bookedTimes }); // e.g. ["9:00AM", "12:00PM"]
+  } catch (error) {
+    console.error("Error checking staff availability:", error);
+    res.status(500).json({ error: "Failed to check staff availability" });
+  }
+};
+
+// Get booked times for a specific staff and date
+// Regular fetch route (for initial load)
+export const getBookedTimes = async (req, res) => {
+  try {
+    const { staff, day, month, year } = req.query;
+
+    if (!staff || !day || !month || !year) {
+      return res.status(400).json({ error: "Missing required query parameters" });
+    }
+
+    const snapshot = await db.collectionGroup("user_bookings")
+      .where("staff", "==", staff)
+      .where("day", "==", Number(day))
+      .where("month", "==", Number(month))
+      .where("year", "==", Number(year))
+      .get();
+
+    const bookedTimes = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.time) bookedTimes.push(data.time);
+    });
+
+    res.status(200).json({ bookedTimes });
+  } catch (error) {
+    console.error("Error fetching booked times:", error);
+    res.status(500).json({ error: "Failed to fetch booked times" });
+  }
+};
+
+// Realtime route using Server-Sent Events
+export const streamBookedTimes = (req, res) => {
+  const { staff, day, month, year } = req.query;
+
+  if (!staff || !day || !month || !year) {
+    res.status(400).json({ error: "Missing required query parameters" });
+    return;
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const query = db.collectionGroup("user_bookings")
+    .where("staff", "==", staff)
+    .where("day", "==", Number(day))
+    .where("month", "==", Number(month))
+    .where("year", "==", Number(year));
+
+  const unsubscribe = query.onSnapshot(
+    (snapshot) => {
+      const bookedTimes = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.time) bookedTimes.push(data.time);
+      });
+
+      res.write(`data: ${JSON.stringify({ bookedTimes })}\n\n`);
+    },
+    (error) => {
+      console.error("Error in realtime booking stream:", error);
+      res.write(`event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`);
+    }
+  );
+
+  // Close listener on client disconnect
+  req.on("close", () => {
+    unsubscribe();
+    res.end();
+  });
+};
+
