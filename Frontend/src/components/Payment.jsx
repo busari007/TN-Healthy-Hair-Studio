@@ -7,7 +7,6 @@ export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract passed data (or use default values if not available)
   const bookingData = location.state;
   const amount = bookingData?.amount || 0;
   const service = bookingData?.service || "Unknown Service";
@@ -17,35 +16,60 @@ export default function Payment() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
+  // MODAL STATE
+  const [modal, setModal] = useState({
+    open: false,
+    message: "",
+    success: true,
+    fadeOut: false,
+  });
+
+  // Function to open modal with fade animation
+  const openModal = (msg, success) => {
+    setModal({ open: true, message: msg, success, fadeOut: false });
+
+    setTimeout(() => {
+      setModal((prev) => ({ ...prev, fadeOut: true }));
+    }, 4000); // Start fade-out at 4 seconds
+
+    setTimeout(() => {
+      setModal({ open: false, message: "", success: true, fadeOut: false });
+
+      if (success) navigate("/bookings");
+    }, 5000); // Fully disappear at 5 seconds
+  };
+
   useEffect(() => {
     console.log("Booking Data:", bookingData);
   }, []);
 
-  // Handle Paystack Payment
+  // Paystack Payment
   const handlePaystackPayment = async () => {
-  alert(`Paystack payment of ₦${amount.toLocaleString()} for ${service} simulated successfully!`);
-  console.log("Booking Data:" + JSON.stringify(bookingData));
-  try {
-    const res = await fetch("http://localhost:5000/api/bookings/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingData),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/payments/init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          email_address: bookingData.email_address,
+          bookingData: bookingData,
+        }),
+      });
 
-    if (res.ok) {
-      alert("Booking confirmed and saved!");
-      navigate("/bookings"); // navigates to booking upon successful booking
-    } else {
-      alert("Booking failed to save!");
+      const data = await res.json();
+
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        openModal("Booking failed. Contact your administrator", false);
+      }
+    } catch (error) {
+      console.error(error);
+      openModal("Booking failed. Contact your administrator", false);
     }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("An error occurred while saving booking.");
-  }
-};
+  };
 
-
-  // Form validations...
+  // Validations
   const validateCardNumber = (value) => {
     const numbersOnly = value.replace(/\D/g, "");
     if (numbersOnly.length <= 16) setCardNumber(numbersOnly);
@@ -70,21 +94,21 @@ export default function Payment() {
     const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
 
     if (cardNumber.length !== 16) {
-      return alert("Card number must be 16 digits.");
+      return openModal("Card number must be 16 digits.", false);
     }
 
     if (!expiryRegex.test(expiry)) {
-      return alert("Expiry must be in MM/YY format.");
+      return openModal("Expiry must be in MM/YY format.", false);
     }
 
     if (cvv.length !== 3) {
-      return alert("CVV must be 3 digits.");
+      return openModal("CVV must be 3 digits.", false);
     }
 
-    alert(`Debit card payment of ₦${amount.toLocaleString()} for ${service} submitted successfully!`);
+    // Fake success for now
+    openModal("Booking confirmed", true);
   };
 
-  // If no booking data was passed via navigation, go back home
   if (!bookingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -96,12 +120,25 @@ export default function Payment() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 mt-10">
+
+      {/* MODAL WITH FADE-IN & FADE-OUT */}
+      {modal.open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <div
+            className={`px-6 py-4 rounded-lg text-white text-lg shadow-lg transform transition-all duration-700
+              ${modal.success ? "bg-green-600" : "bg-red-600"}
+              ${modal.fadeOut ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+          >
+            {modal.message}
+          </div>
+        </div>
+      )}
+
       <div className="w-full md:w-[90%] lg:w-[60%] xl:w-[40%] bg-white rounded-lg shadow-lg p-6 md:p-8">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 text-center Playfair">
           Checkout
         </h2>
 
-        {/* Show service and amount */}
         <div className="text-center mb-4 text-gray-700">
           <p className="text-sm">Service:</p>
           <p className="text-lg font-semibold">{service}</p>
@@ -109,7 +146,6 @@ export default function Payment() {
           <p className="text-2xl font-bold">₦{amount.toLocaleString()}</p>
         </div>
 
-        {/* Payment selection */}
         <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6 Lato">
           <button
             className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 rounded-lg font-semibold transition hover:cursor-pointer ${
@@ -136,7 +172,6 @@ export default function Payment() {
           </button>
         </div>
 
-        {/* Payment form */}
         {method === "paystack" ? (
           <div className="text-center mt-6">
             <button
@@ -148,9 +183,10 @@ export default function Payment() {
           </div>
         ) : (
           <form onSubmit={handleDebitCardPayment} className="space-y-4">
-            {/* Card form fields */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Card Number</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Card Number
+              </label>
               <input
                 type="text"
                 value={cardNumber}
@@ -163,7 +199,9 @@ export default function Payment() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700">Expiry Date</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Expiry Date
+                </label>
                 <input
                   type="text"
                   value={expiry}
@@ -175,7 +213,9 @@ export default function Payment() {
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700">CVV</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  CVV
+                </label>
                 <input
                   type="password"
                   value={cvv}

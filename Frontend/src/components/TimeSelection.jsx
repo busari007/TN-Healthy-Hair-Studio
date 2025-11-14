@@ -36,28 +36,6 @@ export default function TimeSelection({
     };
 
     fetchInitial();
-
-    // --- Realtime Stream (SSE) ---
-    const eventSource = new EventSource(
-      `${apiBase}/api/bookings/booked-times/stream?staff=${encodeURIComponent(
-        selectedStaff
-      )}&day=${day}&month=${month}&year=${year}`
-    );
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setBookedTimes(data.bookedTimes || []);
-    };
-
-    eventSource.onerror = (err) => {
-      console.error("Realtime stream error:", err);
-      eventSource.close();
-    };
-
-    // Cleanup listener on unmount
-    return () => {
-      eventSource.close();
-    };
   }, [selectedDate, selectedStaff]);
 
   const handleTimeClick = (time) => {
