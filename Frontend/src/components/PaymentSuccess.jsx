@@ -18,7 +18,7 @@ export default function PaymentSuccess() {
     // Redirect to /bookings after 5 seconds
     const timer = setTimeout(() => {
       navigate("/bookings");
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer); // cleanup
   }, [reference, navigate]);

@@ -12,10 +12,10 @@ export default function TimeSelection({
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
 
-  const timeSlots = ["9:00 AM", "12:00 PM"];
+  const timeSlots = ["9:00AM", "12:00PM"];
 
   useEffect(() => {
-    if (!selectedDate || !selectedStaff) return;
+    if (!selectedDate || !selectedStaff) return; 
 
     const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
     const { day, month, year } = selectedDate;

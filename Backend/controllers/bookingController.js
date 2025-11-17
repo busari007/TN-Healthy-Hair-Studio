@@ -23,12 +23,20 @@ export const createBooking = async (req, res) => {
       .collection("user_bookings")
       .doc(); // auto-ID for each new booking
 
-    await bookingRef.set({
-      ...bookingData,
-      payment_status: "confirmed",
-      status:"Pending",
-      createdAt: new Date(),
-    });
+    // In createBooking
+await bookingRef.set({
+  ...bookingData,
+  day: Number(bookingData.day),
+  month: Number(bookingData.month),
+  year: Number(bookingData.year),
+  amount: Number(bookingData.amount),
+  staff: bookingData.staff.trim(),
+  time: bookingData.time.replace(/\s/g, "").toUpperCase(), // normalize times
+  payment_status: "confirmed",
+  status:"Pending",
+  createdAt: new Date(),
+});
+
 
     res.status(201).json({
       message: `Booking successfully created for ${bookingData.email_address}.`,
@@ -226,28 +234,30 @@ export const getBookedDates = async (req, res) => {
   try {
     const snapshot = await db.collectionGroup("user_bookings").get();
 
-    // Helper to normalize time formatting (e.g. "9:00 AM" → "9:00AM")
-    const normalize = (t) => (t ? t.replace(/\s/g, "").toUpperCase() : "");
+    const normalizeTime = (t) => (t ? t.replace(/\s/g, "").toUpperCase() : "");
+    const normalizeStaff = (s) => (s ? s.replace(/\./g, "").trim().toUpperCase() : "");
 
-    // Track bookings by date and staff
     const bookingsByDate = {};
 
     snapshot.forEach((doc) => {
       const data = doc.data();
-      const { day, month, year, staff, time } = data;
-      if (!day || !month || !year || !staff || !time) return;
+      const { day, month, year, staff, time, status } = data;
 
-      const key = `${day}-${month}-${year}`;
-      if (!bookingsByDate[key]) bookingsByDate[key] = {};
-      if (!bookingsByDate[key][staff]) bookingsByDate[key][staff] = [];
+      // ✅ Only consider Pending bookings
+      if (!day || !month || !year || !staff || !time || status !== "Pending") return;
 
-      bookingsByDate[key][staff].push(normalize(time));
+      const dateKey = `${day}-${month}-${year}`;
+      const staffKey = normalizeStaff(staff);
+
+      if (!bookingsByDate[dateKey]) bookingsByDate[dateKey] = {};
+      if (!bookingsByDate[dateKey][staffKey]) bookingsByDate[dateKey][staffKey] = [];
+
+      bookingsByDate[dateKey][staffKey].push(normalizeTime(time));
     });
 
-    const allStaff = ["Mrs. Ebun", "Stephanie", "Ayomide"];
-    const requiredTimes = ["9:00AM", "12:00PM"].map(normalize);
+    const allStaff = ["Mrs Ebun", "Stephanie", "Ayomide"].map(normalizeStaff);
+    const requiredTimes = ["9:00AM", "12:00PM"].map(normalizeTime);
 
-    // ✅ A date is fully booked if *all staff* have *both required times* booked
     const fullyBookedDates = Object.entries(bookingsByDate)
       .filter(([_, staffBookings]) =>
         allStaff.every(
@@ -268,45 +278,54 @@ export const getBookedDates = async (req, res) => {
   }
 };
 
-// 🔹 Check staff availability for a given date
+
+// 🔹 Check staff availability for a given date (with normalized staff names)
 export const checkStaffAvailability = async (req, res) => {
   try {
-    const { staff, day, month, year } = req.query;
+    let { staff, day, month, year } = req.query;
 
     if (!staff || !day || !month || !year) {
       return res.status(400).json({ error: "Missing required query parameters" });
     }
 
-    const snapshot = await db.collectionGroup("user_bookings")
-      .where("staff", "==", staff)
-      .where("day", "==", Number(day))
-      .where("month", "==", Number(month))
-      .where("year", "==", Number(year))
-      .get();
+    const normalizeStaff = (s) => (s ? s.replace(/\./g, "").trim().toUpperCase() : "");
+    staff = normalizeStaff(staff);
 
-    // Normalize time strings to remove spaces for consistent comparison
+    const snapshot = await db.collectionGroup("user_bookings").get();
+
     const bookedTimes = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
-      if (data.time) {
-        // Remove extra spaces and make AM/PM uppercase
-        bookedTimes.push(data.time.replace(/\s+/g, "").toUpperCase()); // "9:00AM", "12:00PM"
+      if (
+        !data.staff || !data.day || !data.month || !data.year || !data.time
+      ) return;
+
+      // ✅ Only consider Pending bookings
+      if (data.status !== "Pending") return;
+
+      if (
+        normalizeStaff(data.staff) === staff &&
+        Number(data.day) === Number(day) &&
+        Number(data.month) === Number(month) &&
+        Number(data.year) === Number(year)
+      ) {
+        bookedTimes.push(data.time.replace(/\s+/g, "").toUpperCase());
       }
     });
 
-    res.status(200).json({ bookedTimes }); // e.g. ["9:00AM", "12:00PM"]
+    res.status(200).json({ bookedTimes });
   } catch (error) {
     console.error("Error checking staff availability:", error);
     res.status(500).json({ error: "Failed to check staff availability" });
   }
 };
 
+
 // Get booked times for a specific staff and date
 // Regular fetch route (for initial load)
 export const getBookedTimes = async (req, res) => {
   try {
     const { staff, day, month, year } = req.query;
-
     if (!staff || !day || !month || !year) {
       return res.status(400).json({ error: "Missing required query parameters" });
     }
@@ -321,7 +340,7 @@ export const getBookedTimes = async (req, res) => {
     const bookedTimes = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
-      if (data.time) bookedTimes.push(data.time);
+      if (data.time && data.status === "Pending") bookedTimes.push(data.time);
     });
 
     res.status(200).json({ bookedTimes });

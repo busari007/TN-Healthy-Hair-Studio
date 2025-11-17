@@ -5,7 +5,7 @@ export default function StaffAvailability({ selectedDate, onStaffSelect }) {
   const [availability, setAvailability] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const { day, month, year, weekday } = selectedDate || {};
+  const { day, month, year, weekday } = selectedDate || {}; 
 
   useEffect(() => {
     if (!selectedDate) return;

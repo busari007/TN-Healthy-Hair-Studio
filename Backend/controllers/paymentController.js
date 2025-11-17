@@ -13,7 +13,8 @@ export const initPaystackPayment = async (req, res) => {
       {
         email: email_address,
         amount: amount * 100,
-        metadata: bookingData
+        metadata: bookingData,
+        callback_url: "http://localhost:5173/payment-success"
       },
       {
         headers: {
@@ -34,27 +35,37 @@ export const initPaystackPayment = async (req, res) => {
 };
 
 
+
 export const paystackWebhook = async (req, res) => {
+  // Validate signature
   const hash = crypto
     .createHmac("sha512", PAYSTACK_SECRET)
-    .update(JSON.stringify(req.body))
+    .update(req.rawBody.toString())     // MUST use raw body!
     .digest("hex");
 
   if (hash !== req.headers["x-paystack-signature"]) {
     return res.status(400).send("Invalid signature");
   }
 
-  const { event, data } = req.body;
+  const { event, data } = JSON.parse(req.rawBody);
 
+  // Handle successful charge
   if (event === "charge.success") {
-    const bookingData = data.metadata;
+    try {
+      const bookingData = data.metadata;
 
-    // create booking in Firestore
-    req.body = bookingData;  
-    await createBooking(req, res);
+      // Fake req/res for createBooking
+      const fakeReq = { body: bookingData };
+      const fakeRes = { status: () => fakeRes, json: () => null };
 
-    return;
+      await createBooking(fakeReq, fakeRes);
+
+      return res.sendStatus(200);
+    } catch (error) {
+      console.error("Booking creation failed:", error);
+      return res.sendStatus(500);
+    }
   }
 
-  res.sendStatus(200);
+  return res.sendStatus(200);
 };

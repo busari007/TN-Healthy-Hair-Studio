@@ -13,7 +13,7 @@ export default function Calendar({ onDateSelect }) {
   // 🔁 Update current time every second
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); 
   }, []);
 
   // 🧠 Fetch booked dates from backend
