@@ -15,6 +15,7 @@ import { Routes, Route } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from './components/PrivateRoute'
+import PaymentSuccess from './components/PaymentSuccess'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/bookings" element={<PaymentPage />} />
         <Route path="/payment-checkout" element={<Payment />} />
+        <Route path="/payment-success" element={<PaymentSuccess/>} />
         <Route path="/admin/users" element={
           <PrivateRoute role="admin">
       <AdminDashboard />
